@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>2Q 게임 프로젝트 평가 시스템</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      text-align: center;
+      background: linear-gradient(to right, #ff6a00, #ffb347);
+      padding: 15px;
+      border-radius: 8px;
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f5f5f5;
+    }
+    input[type="number"] {
+      width: 60px;
+    }
+    input[type="text"] {
+      width: 100%;
+    }
+    .top-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .top-form input, .top-form select {
+      flex: 1;
+      padding: 8px;
+    }
+    .btn {
+      background: #7c4dff;
+      color: white;
+      padding: 10px 20px;
+      margin-top: 20px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="pdfContent">
+    <h1>2Q 게임 프로젝트 평가 시스템</h1>
+
+    <div class="top-form">
+      <input type="text" placeholder="평가자 이름" id="evaluatorName" />
+      <select id="role">
+        <option value="프로그래머">프로그래밍 팀</option>
+        <option value="기획자">기획 팀</option>
+        <option value="아트">아트 팀</option>
+      </select>
+      <input type="date" id="evalDate" value="2025-07-25" />
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>번호</th>
+          <th>기획자 이름</th>
+          <th>프로젝트 요약</th>
+          <th>창의성</th>
+          <th>구현 가능성</th>
+          <th>시스템 설계</th>
+          <th>협업 태도</th>
+          <th>기타</th>
+          <th>총점</th>
+          <th>평균</th>
+          <th>아트 지원</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- JS에서 자동으로 44줄 생성 -->
+      </tbody>
+    </table>
+
+    <button class="btn" onclick="calculateScores()">✅ 점수 계산</button>
+    <button class="btn" onclick="downloadPDF()">📄 PDF로 저장</button>
+  </div>
+
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // 자동으로 44명 입력 행 생성
+    const tbody = document.getElementById("tableBody");
+    for (let i = 1; i <= 44; i++) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${i}</td>
+        <td><input type="text" placeholder="이름" /></td>
+        <td><input type="text" placeholder="요약" /></td>
+        <td><input type="number" class="score" /></td>
+        <td><input type="number" class="score" /></td>
+        <td><input type="number" class="score" /></td>
+        <td><input type="number" class="score" /></td>
+        <td><input type="number" class="score" /></td>
+        <td class="total">0</td>
+        <td class="avg">0.0</td>
+        <td><input type="checkbox" /></td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    function calculateScores() {
+      document.querySelectorAll('tbody tr').forEach(row => {
+        let scores = row.querySelectorAll('.score');
+        let total = 0;
+        let count = 0;
+        scores.forEach(input => {
+          const value = parseFloat(input.value);
+          if (!isNaN(value)) {
+            total += value;
+            count++;
+          }
+        });
+        row.querySelector('.total').innerText = total;
+        row.querySelector('.avg').innerText = (count > 0) ? (total / count).toFixed(1) : '0.0';
+      });
+      alert("✅ 44명의 점수가 계산되었습니다!");
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById('pdfContent');
+      const opt = {
+        margin: 0.2,
+        filename: '2Q_평가표.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+</body>
+</html>

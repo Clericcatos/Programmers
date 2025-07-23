@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🐣 2쿼터 게임 평가 폼 🐣</title>
+  <style>
+    body {
+      font-family: "Pretendard", "맑은 고딕", sans-serif;
+      background-color: #fef6fa;
+      color: #4e4e4e;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      color: #d47ab9;
+      margin-bottom: 20px;
+    }
+    .game-block {
+      background: #fff0f6;
+      border: 2px dashed #f3bce2;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(240,160,220,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+    }
+    select, input[type="text"], textarea {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 14px;
+      margin-top: 4px;
+      border: 1px solid #e5aad2;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 6px;
+      margin-right: 10px;
+      border-radius: 6px;
+      border: 1px solid #e0bde7;
+    }
+    button, input[type="submit"] {
+      padding: 10px 18px;
+      font-size: 14px;
+      background-color: #ffa8e2;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    button:hover, input[type="submit"]:hover {
+      background-color: #f27ac8;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌸 2쿼터 게임 기획 평가 폼 🌸</h1>
+
+  <label>몇 개 평가할까요?</label>
+  <input type="number" id="gameCount" min="1" max="100" value="5">
+  <button onclick="generateForms()">폼 만들기 ✨</button>
+
+  <form id="evaluationForm"></form>
+
+  <script>
+    function generateForms() {
+      const count = parseInt(document.getElementById("gameCount").value);
+      const container = document.getElementById("evaluationForm");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        const block = document.createElement("div");
+        block.className = "game-block";
+        block.innerHTML = `
+          <h2>🎮 ${i}번 게임</h2>
+          <label>기획 반</label>
+          <select><option>기획 1반</option><option>기획 2반</option></select>
+
+          <label>게임 설명</label>
+          <input type="text" placeholder="게임 내용을 입력해 주세요!">
+
+          ${ratingField("🌈 창의성", i)}
+          ${ratingField("🛠 기술 구현 가능성", i)}
+          ${ratingField("🎁 게임성", i)}
+          ${ratingField("🖼 리소스 요구량", i)}
+          ${ratingField("🤝 협업 용이성", i)}
+          ${ratingField("⏱ 완성 가능성", i)}
+
+          <label>💬 의견 남기기</label>
+          <textarea rows="3" placeholder="귀여운 피드백도 환영이에요!"></textarea>
+        `;
+        container.appendChild(block);
+      }
+    }
+
+    function ratingField(label, idx) {
+      return `
+        <label>${label}</label>
+        <select name="${label}_${idx}">
+          <option value="1">🌟 1 - 너무 부족해요</option>
+          <option value="2">⭐️ 2</option>
+          <option value="3">🌟 3 - 괜찮아요</option>
+          <option value="4">⭐️ 4</option>
+          <option value="5">🌟 5 - 최고에요!</option>
+        </select>
+      `;
+    }
+  </script>
+</body>
+</html>

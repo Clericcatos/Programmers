@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>게임 평가 - 항목 단위 이미지 저장</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: "맑은 고딕", sans-serif;
+      background: #fef6fa;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #d47ab9;
+    }
+    .controls {
+      margin: 20px 0;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      border: 1px solid #e0bde7;
+      border-radius: 6px;
+    }
+    button {
+      background: #ffa8e2;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      margin-left: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #f27ac8;
+    }
+    .game-block {
+      background: #fff0f6;
+      border: 2px dashed #f3bce2;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(240,160,220,0.1);
+    }
+    label, input, select, textarea {
+      display: block;
+      margin: 8px 0;
+      width: 100%;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌸 게임 평가 폼 🌸</h1>
+
+  <div class="controls">
+    <label>게임 수:
+      <input type="number" id="gameCount" value="6" min="1" max="50">
+    </label>
+    <button onclick="generateForms()">폼 생성</button>
+    <button onclick="saveGroupedImages()">이미지 저장 (항목 단위)</button>
+  </div>
+
+  <div id="formContainer"></div>
+
+  <script>
+    function generateForms() {
+      const count = parseInt(document.getElementById("gameCount").value);
+      const container = document.getElementById("formContainer");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        const div = document.createElement("div");
+        div.className = "game-block";
+        div.innerHTML = `
+          <h3>🎮 ${i}번 게임</h3>
+          <label>기획 반
+            <select><option>기획 1반</option><option>기획 2반</option></select>
+          </label>
+          <label>게임 설명
+            <input type="text" placeholder="게임 내용을 입력해주세요">
+          </label>
+          <label>🌈 창의성
+            <select><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          </label>
+          <label>🛠 구현 가능성
+            <select><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          </label>
+          <label>🎁 게임성
+            <select><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          </label>
+          <label>💬 의견
+            <textarea rows="3" placeholder="귀여운 피드백도 환영이에요!"></textarea>
+          </label>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    async function saveGroupedImages() {
+      const blocks = document.querySelectorAll(".game-block");
+      const blockCanvases = [];
+
+      // 각 항목을 캔버스로 개별 렌더링
+      for (const block of blocks) {
+        const canvas = await html2canvas(block, { scale: 2 });
+        blockCanvases.push(canvas);
+      }
+
+      // 묶어서 페이지 단위로 저장
+      const PAGE_HEIGHT = 1600; // 한 페이지 최대 높이(px)
+      let pageIndex = 1;
+      let grouped = [];
+      let currentHeight = 0;
+
+      for (let i = 0; i < blockCanvases.length; i++) {
+        const canvas = blockCanvases[i];
+        if (currentHeight + canvas.height > PAGE_HEIGHT && grouped.length > 0) {
+          await savePage(grouped, pageIndex);
+          pageIndex++;
+          grouped = [];
+          currentHeight = 0;
+        }
+        grouped.push(canvas);
+        currentHeight += canvas.height;
+      }
+
+      if (grouped.length > 0) {
+        await savePage(grouped, pageIndex);
+      }
+    }
+
+    async function savePage(canvases, pageIndex) {
+      // 최종 캔버스 크기 계산
+      const width = Math.max(...canvases.map(c => c.width));
+      const height = canvases.reduce((sum, c) => sum + c.height, 0) + 60;
+
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = width;
+      finalCanvas.height = height;
+      const ctx = finalCanvas.getContext("2d");
+
+      let offsetY = 0;
+      for (const c of canvases) {
+        ctx.drawImage(c, 0, offsetY);
+        offsetY += c.height;
+      }
+
+      // 페이지 번호 추가
+      ctx.fillStyle = "#888";
+      ctx.font = "20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`Page ${pageIndex}`, width / 2, height - 20);
+
+      // 저장
+      const image = finalCanvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `게임평가_Page${pageIndex}.png`;
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
